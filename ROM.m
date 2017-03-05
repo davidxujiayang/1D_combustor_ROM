@@ -106,6 +106,8 @@ namemat = ['./data/FOM_span=',num2str(FOM_span),',ML=',num2str(ML),method{ROM_ME
 n_log = 0;
 Ihist = [1:10,ML+1:ML+10,2*ML+1:2*ML+10,3*ML+1:3*ML+10];
 ahist = a(Ihist);
+figure
+
 while (n<n_FOM+n_ROM)
     
     n = n+1;

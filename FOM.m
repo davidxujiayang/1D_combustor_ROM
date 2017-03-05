@@ -1,3 +1,5 @@
+function FOM(CFL_FOM,FOM_span)
+
 global nelem nIE A V Uinf Propinf Sf V4 phist pmean pstd nread n Uptb Uptb2 Uptb3 w_f alpha t tptb Phi Ustd INDEX eL eR
 
 %% Load steady results
@@ -45,6 +47,7 @@ phist = zeros(nelem,dn_FOM);               % for allocation
 pMonhist = zeros(1,n_FOM);
 Usol = [];
 % load Usol_FOM
+figure
 while (n < n_FOM)
     n = n+1;
     
@@ -76,4 +79,6 @@ while (n < n_FOM)
 end
 print(gcf,'-djpeg',sprintf('-r%d',300),'./images/FOM_result.jpg')
 save('./data/Usol_FOM','n','nwrite','U','Usol','phist','pMonhist','CFL_FOM','FOM_span');
+
+end
 

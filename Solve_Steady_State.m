@@ -1,4 +1,4 @@
-close all;clear all;
+function Solve_Steady_State
 
 %% Chamber Geometry
 N = 1200;            % Node Number
@@ -47,7 +47,10 @@ Uinf(3) = 0.5*uinf*Uinf(2)+pinf/(gamma_inf-1);
 Uout = zeros(1,4);
 
 U = repmat(Uinf, nelem, 1);
+
+% % Load backup data
 % load('U_steady.mat');
+
 if length(U(:,1))~=nelem
     Nold = length(U(:,1))+1;
     xold = read_shape(Nold);
@@ -65,9 +68,9 @@ save('./data/Std.mat', 'Std');
 %% convergence settings
 
 n = 0;
-nmax = 50000;      % Max number of iterations
-Rtol = -2;        % tolerance
-CFL = 0.5;            % CFL number
+nmax = 50000;           % Max number of iterations
+Rtol = -2;              % tolerance
+CFL = 0.5;              % CFL number
 Res = [];
 Rmax = 1;
 Rhist = [];
@@ -189,3 +192,5 @@ hLine1.LineWidth = 1;
 hLine2.LineWidth = 1;
 set(gcf,'position',[100 100 600 200])
 print(gcf,'-djpeg',sprintf('-r%d',300),'./images/steady_state.jpg');
+
+end

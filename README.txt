@@ -14,6 +14,7 @@ Solve_Steady_State:	Obtains steady state result
 FOM:				Does full-order unsteady simulation & generates 
 					snapshot for ROM
 ROM:				Does reduced-order simulation
+                    Note: in ROM, CFL>1 can be used -> acceleration
 FluxFunction:		Computes ROE flux
 jacoRQ:				Computes the Jacobian of the residual using Van Leer method
 
