@@ -31,8 +31,8 @@ end
 
 clear all
 
-ROM_METHOD = 2;
-CFL_ROM = 1;
+ROM_METHOD = 1;
+CFL_ROM = 5;
 ROM_span = 0.2;     % ending time of ROM
 ML = 151;           % number of modes kept
 RESTART = 0;        % 0 for starting ROM at the end of FOM, 1 for at t=0  
