@@ -1,4 +1,4 @@
-function R = Res_GN(a)
+function R = Cal_Res_a(a)
 global nelem nIE A V V4 Uinf Propinf Sf phist pmean nread w_f alpha Phi Ustd Uptb Uptb2 Uptb3 n t tptb
 run 'constantsch4.m'
 U = reshape(Phi*a+Ustd,[],4);
@@ -61,6 +61,4 @@ Sq=zeros(nelem, 4);
 Sq(:,3) = alpha*(t(n)>tptb)*Sf(:,3).*(phist(:,nread)./pmean-1);
 Ssum = S+Sf+Sq;
 
-R = R - Ssum.*repmat(V,1,4);
-R = reshape(R,[],1)./V4;
-% R = reshape(R./V4 - Ssum,[],1);
+R = reshape(R./V4 - Ssum,[],1);

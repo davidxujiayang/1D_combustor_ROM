@@ -1,17 +1,20 @@
-function ROM(ROM_METHOD,CFL_ROM,ROM_span,ML,RESTART)
+function ROM(ROM_METHOD,CFL_ROM,ROM_span,ML,RESTART,scheme)
 % ROM_METHOD: RK4 = 1; GN = 2;
 method = {',RK4',',GN'};
 if nargin<5
     RESTART = 0;
 end
-   
+if nargin<6
+    scheme = 1;
+end
+
 global nelem nIE A V Uinf Propinf Sf V4 phist pmean pstd nread n Uptb Uptb2 Uptb3 w_f alpha t tptb Phi Ustd INDEX eL eR dFdQ dJdQ2 dJdQ3 dJdQ4
 
 %% Load steady results
 run Load_steady
 
 Ustd = reshape(U,[],1);
-V4 = repmat(V,4,1);
+V4 = repmat(V,1,4);
 
 load Usol_FOM
 dt_FOM = CFL_FOM/CFLstd * dtstd;
@@ -21,7 +24,12 @@ if ML>nelem
 end
 
 if ROM_METHOD == 2
-    run Load_Jacobian
+    switch scheme
+        case 1
+            run Load_Jacobian_vl
+        case 2
+            run Load_Jacobian_roe
+    end
 end
 
 eL=[]; eR=[];
@@ -104,7 +112,8 @@ namefig = ['./images/FOM_span=',num2str(FOM_span),',ML=',num2str(ML),method{ROM_
 namemat = ['./data/FOM_span=',num2str(FOM_span),',ML=',num2str(ML),method{ROM_METHOD},',CFL=',num2str(CFL_ROM),'.mat'];
 %load(namemat);
 n_log = 0;
-Ihist = [1:10,ML+1:ML+10,2*ML+1:2*ML+10,3*ML+1:3*ML+10];
+
+Ihist = [1:min(ML,10),ML+1:ML+min(ML,10),2*ML+1:2*ML+min(ML,10),3*ML+1:3*ML+min(ML,10)];
 ahist = a(Ihist);
 figure
 
@@ -123,8 +132,8 @@ while (n<n_FOM+n_ROM)
             a = RK4(a,PhiT,dt_ROM);
         case 2
             % Iter_max = num of subiterations
-            Iter_max = 2;
-            a = GN(a,PhiT,dt_ROM,ML,Iter_max);
+            Iter_max = 4;
+            a = GN(a,PhiT,dt_ROM,ML,Iter_max,scheme);
     end
     
     ahist = [ahist a(Ihist)];
@@ -134,9 +143,9 @@ while (n<n_FOM+n_ROM)
     plot(t(1:20:n-1),pMonhist(1:20:n-1) - pstd(nMon));xlabel('time (s)');ylabel('p''(Pa)');
     title(['t_{FOM}=',num2str(FOM_span),', ML=',num2str(ML),method{ROM_METHOD},',CFL=',num2str(CFL_ROM)]);drawnow;
     print(gcf,'-djpeg',sprintf('-r%d',300),namejpg);
-%     
-%     saveas(gcf,namefig);
-%     save(namemat,'n','a','ahist','phist','pMonhist','dt_ROM','n_FOM');
+    %
+    %     saveas(gcf,namefig);
+    %     save(namemat,'n','a','ahist','phist','pMonhist','dt_ROM','n_FOM');
 end
 end
 function a = RK4(a,PhiT,dt_ROM)
@@ -147,13 +156,13 @@ for subiter = 1:4
 end
 end
 
-function a = GN(a,PhiT,dt_ROM,ML,Iter_max)
-an = a;
+function a = GN(a,PhiT,dt_ROM,ML,Iter_max,scheme)
+aold = a;
 for subiter = 1:Iter_max
     R = Cal_Res_a(a);
-    J = jacoRQ(a);
-    Jr = eye(4*ML)/(dt_ROM/(Iter_max+1-subiter)) + PhiT*J;
-    r = (a-an)/(dt_ROM/(Iter_max+1-subiter)) + PhiT*R;
+    J = jacoRQ(a,scheme);
+    Jr = eye(4*ML)/(dt_ROM/(Iter_max + 1 - subiter)) + PhiT*J;
+    r = (a-aold)/(dt_ROM/(Iter_max + 1 - subiter)) + PhiT*R;
     da = -Jr\r;
     a = a + da;
 end

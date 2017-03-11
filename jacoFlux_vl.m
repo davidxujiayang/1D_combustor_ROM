@@ -1,19 +1,25 @@
-function FA = jacoFlux_vl(UL, UR, gammaL,gammaR,AM)
-%
-% OUTPUTS:
-%  FA   : the flux out of the left cell (into the right cell) * Area
+function [FL,FR] = jacoFlux_vl(UL, UR, gammaL,gammaR,AM)
 
 global  fa_p fa_m fb_p fb_m...
     faQ1_p faQ2_p faQ3_p faQ1_m faQ2_m faQ3_m...
     fbQ1_p fbQ2_p fbQ3_p fbQ1_m fbQ2_m fbQ3_m ...
-    fcQ1_p fcQ2_p fcQ3_p fcQ4_p fcQ1_m fcQ2_m fcQ3_m fcQ4_m
+    fcQ1_p fcQ2_p fcQ3_p fcQ4_p fcQ1_m fcQ2_m fcQ3_m fcQ4_m ...
+    dFdQ Mach
 
 N = length(UL)/4;
 
 % left flux
 FL = zeros(4*N, 4*N); % for allocation
+ML = zeros(1,N);
 for i=1:N
     Q1L = UL(i);Q2L = UL(i+N);Q3L = UL(i+2*N);Q4L = UL(i+3*N);gL = gammaL(i);
+    
+    ML(i) = Mach(Q1L,Q2L,Q3L,gL);
+    
+    if ML(i)>=1
+        FL([i,i+N,i+2*N,i+3*N],[i,i+N,i+2*N,i+3*N])=dFdQ(Q1L,Q2L,Q3L,Q4L,gL)*AM(i);
+        continue
+    end
     
     fa = fa_p(Q1L,Q2L,Q3L,gL);
     fb = fb_p(Q1L,Q2L,Q3L,gL);
@@ -45,6 +51,9 @@ end
 % right flux
 FR = zeros(4*N, 4*N); % for allocation
 for i=1:N
+    if ML(i)>=1
+        continue
+    end
     Q1R = UR(i);Q2R = UR(i+N);Q3R = UR(i+2*N);Q4R = UR(i+3*N);gR = gammaR(i);
     
     fa = fa_m(Q1R,Q2R,Q3R,gR);
@@ -73,9 +82,5 @@ for i=1:N
     FR(i+3*N,i+2*N) = fcQ3_m(Q1R,Q2R,Q3R,Q4R,gR)*AM(i);
     FR(i+3*N,i+3*N) = fcQ4_m(Q1R,Q2R,Q3R,gR)*AM(i);
 end
-
-
-FA = FL + FR;
-
 end
 

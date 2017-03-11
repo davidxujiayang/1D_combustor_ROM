@@ -1,7 +1,10 @@
-function Solve_Steady_State
+function Solve_Steady_State(N)
 
 %% Chamber Geometry
-N = 1200;            % Node Number
+if nargin<1
+    N = 1200;
+end
+
 Li = 0.1397;          % Injector Length
 
 [x,A] = read_shape(N);

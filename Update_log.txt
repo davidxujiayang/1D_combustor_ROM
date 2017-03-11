@@ -1,0 +1,13 @@
+===================================================================================
+
+2017/3/10
+
+1. Bugs in Gauss-Newton subroutine fixed.
+
+2. You can choose between Van Leer and Roe flux (slow) scheme for the Jacobian of 
+   residual in Gauss-Newton method. (The residual itself is from Roe scheme).
+
+3. You don't have to re-run steady state solver and FOM solver. 
+   However the Jacobian has to be re-generated.
+
+===================================================================================
