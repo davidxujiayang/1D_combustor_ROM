@@ -18,7 +18,7 @@ RUN_JACOBIAN = 0;
 JACOBIAN_FLUX_SCHEME = 1;   % 1 for Van Leer, 2 for Roe
 
 ROM_METHOD = 1;     % 1 for RK4, 2 for GN
-CFL_ROM = 10;
+CFL_ROM = 5;
 ROM_span = 0.2;     % ending time of ROM
 ML = 151;           % number of modes kept
 RESTART = 0;        % 0 for starting ROM at the end of FOM, 1 for at t=0
