@@ -46,12 +46,22 @@ F1= 1400; % 1st resonant frequency;
 T1 = 1/F1; % 1st resonant period;
 tau = Ct*T1;
 
-n_FOM = ceil(FOM_span/dt_FOM)+1;
-dn_FOM = ceil(tau/dt_FOM);
-t = (0:n_FOM-1)*dt_FOM;
-n_ROM = ceil((ROM_span-FOM_span)/dt_ROM)+1;
-dn_ROM = ceil(tau/dt_ROM);
-t = [t t(end)+(1:n_ROM)*dt_ROM];
+
+if RESTART == 1
+    n_ROM = ceil((ROM_span)/dt_ROM)+1;
+    dn_ROM = ceil(tau/dt_ROM);
+    t = (0:n_ROM-1)*dt_ROM;
+    n_total = n_ROM;
+else
+    n_FOM = ceil(FOM_span/dt_FOM)+1;
+    dn_FOM = ceil(tau/dt_FOM);
+    t = (0:n_FOM-1)*dt_FOM;
+    n_ROM = ceil((ROM_span-FOM_span)/dt_ROM)+1;
+    dn_ROM = ceil(tau/dt_ROM);
+    t = [t t(end)+(1:n_ROM)*dt_ROM];
+    n_total = n_FOM+n_ROM;
+end
+
 
 %% Perturbations & steady source term
 
@@ -93,19 +103,21 @@ phist_old = phist;
 nwrite_old = nwrite;
 
 %% ROM
+phist = zeros(nelem,dn_ROM);               % for allocation
+
 if RESTART == 1
     n = 0;
+else
+    nwrite_new = mod(n-1,dn_ROM)+1;
+    base_old = (linspace(0,1,dn_FOM))';
+    base_new = (linspace(0,1,dn_ROM))';
+    for i=1:nelem
+        phist_temp=circshift(phist_old(i,:)',[dn_FOM-nwrite_old,0]);
+        phist(i,:)=(interp1q(base_old,phist_temp,base_new))';
+        phist(i,:)=circshift(phist(i,:),[0,nwrite_new-dn_ROM]);
+    end
 end
 
-nwrite_new = mod(n-1,dn_ROM)+1;
-phist = zeros(nelem,dn_ROM);               % for allocation
-base_old = (linspace(0,1,dn_FOM))';
-base_new = (linspace(0,1,dn_ROM))';
-for i=1:nelem
-    phist_temp=circshift(phist_old(i,:)',[dn_FOM-nwrite_old,0]);
-    phist(i,:)=(interp1q(base_old,phist_temp,base_new))';
-    phist(i,:)=circshift(phist(i,:),[0,nwrite_new-dn_ROM]);
-end
 pmean = pstd;
 namejpg = ['./images/FOM_span=',num2str(FOM_span),',ML=',num2str(ML),method{ROM_METHOD},',CFL=',num2str(CFL_ROM),'.jpg'];
 namefig = ['./images/FOM_span=',num2str(FOM_span),',ML=',num2str(ML),method{ROM_METHOD},',CFL=',num2str(CFL_ROM),'.fig'];
@@ -117,7 +129,7 @@ Ihist = [1:min(ML,10),ML+1:ML+min(ML,10),2*ML+1:2*ML+min(ML,10),3*ML+1:3*ML+min(
 ahist = a(Ihist);
 figure
 
-while (n<n_FOM+n_ROM)
+while (n<n_total)
     
     n = n+1;
     nwrite = mod(n-1,dn_ROM)+1;
